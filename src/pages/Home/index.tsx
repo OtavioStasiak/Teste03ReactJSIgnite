@@ -13,55 +13,54 @@ interface Product {
   image: string;
 }
 
-interface ProductFormatted extends Product {
-  priceFormatted: string;
-}
-
 interface CartItemsAmount {
   [key: number]: number;
 }
 
+export interface ProductFormatted extends Product {
+  amount: string;
+}
+
+
 const Home = (): JSX.Element => {
-  // const [products, setProducts] = useState<ProductFormatted[]>([]);
-  // const { addProduct, cart } = useCart();
+   const [products, setProducts] = useState<Product[]>([]);
+   const { addProduct, cart } = useCart();
 
-  // const cartItemsAmount = cart.reduce((sumAmount, product) => {
-  //   // TODO
-  // }, {} as CartItemsAmount)
-
-  useEffect(() => {
     async function loadProducts() {
-      // TODO
-    }
+      const response =  await api.get('products');
+      setProducts(response.data);
+    };
 
-    loadProducts();
-  }, []);
+    useEffect(() => { loadProducts();}, []);
 
-  function handleAddProduct(id: number) {
-    // TODO
-  }
 
-  return (
-    <ProductList>
-      <li>
-        <img src="https://rocketseat-cdn.s3-sa-east-1.amazonaws.com/modulo-redux/tenis1.jpg" alt="Tênis de Caminhada Leve Confortável" />
-        <strong>Tênis de Caminhada Leve Confortável</strong>
-        <span>R$ 179,90</span>
-        <button
-          type="button"
-          data-testid="add-product-button"
-        // onClick={() => handleAddProduct(product.id)}
-        >
-          <div data-testid="cart-product-quantity">
-            <MdAddShoppingCart size={16} color="#FFF" />
-            {/* {cartItemsAmount[product.id] || 0} */} 2
-          </div>
+    function handleAddProduct(productId: number) {
+      addProduct(productId);
+    };
 
-          <span>ADICIONAR AO CARRINHO</span>
-        </button>
-      </li>
-    </ProductList>
-  );
+    return (
+
+      <ProductList>
+        {products.map((item,index) => 
+        <li key={item.id}>
+          <img src={item.image} alt={item.title} />
+          <strong>{item.title}</strong>
+          <span>{new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(item.price)}</span>
+          <button
+            type="button"
+            data-testid="add-product-button"
+          onClick={() => handleAddProduct(item.id)}
+          >
+            <div data-testid="cart-product-quantity">
+              <MdAddShoppingCart size={16} color="#FFF" />
+            {cart.find(shoe => shoe.id === item.id)?.amount || 0}
+            </div>
+
+            <span>ADICIONAR AO CARRINHO</span>
+          </button>
+        </li>)}
+      </ProductList>
+    );
 };
 
 export default Home;
